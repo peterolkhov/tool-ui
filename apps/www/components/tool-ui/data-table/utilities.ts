@@ -247,7 +247,11 @@ export function parseNumericLike(input: string): number | null {
     if (hasGroupedThousands(s, ",")) {
       s = s.replace(/,/g, "");
     } else {
-      const frac = s.length - lastComma - 1;
+      // Exclude suffixes when counting decimals, preserving grouping ambiguity.
+      const coefficient = s.match(/^([+-]?\d+,\d+)[KMGTP]B?$/i)?.[1] ?? s;
+      const frac = hasGroupedThousands(coefficient, ",")
+        ? s.length - lastComma - 1
+        : coefficient.length - lastComma - 1;
       if (frac >= 1 && frac <= 3) s = s.replace(/,/g, ".");
       else s = s.replace(/,/g, "");
     }
